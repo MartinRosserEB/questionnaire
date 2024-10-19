@@ -1,0 +1,13 @@
+{
+    "accept_group_join_request": "Einladung(en) zu Gruppen annehmen",
+    "create_team": "Team erstellen",
+    "team_name": "Name des Teams",
+    "no_user_found_with_email_address": "Kein Benutzer mit dieser Emailadresse gefunden.",
+    "invite_user_to_team": "Benutzer zu Team einladen",
+    "email": "Email",
+    "delete_team": "\"{{name}}\" löschen",
+    "delete": "Team löschen",
+    "update_team": "Team bearbeiten",
+    "send_mail": "Mail an Benutzer ohne Konto versenden",
+    "remove_users_from_team": "Bestehende Benutzer entfernen:"
+}

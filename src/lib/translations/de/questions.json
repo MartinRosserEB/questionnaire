@@ -1,0 +1,10 @@
+{
+    "next": "vor",
+    "previous": "zurück",
+    "question_x_of_y": "Frage {{xval}} von {{yval}}.",
+    "show_all": "Zeige alle Fragen an",
+    "show_unanswered_only": "Zeige unbeantwortete Fragen an",
+    "all_questions_answered": "Du hast alle Fragen beantwortet.",
+    "categories": "Kategorien",
+    "xval_questions_selected": "In {{selectedCategories; 1:der ausgewählten Kategorie; default: den ausgewählten Kategorien}} {{xval; 1:befindet sich {{xval}} Frage; default:befinden sich {{xval}} Fragen}}."
+}

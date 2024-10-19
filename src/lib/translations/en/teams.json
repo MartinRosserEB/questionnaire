@@ -1,0 +1,5 @@
+{
+    "load_teams": "Load teams",
+    "add_remove_results_team": "Add or remove result(s) to or from team \"{{name}}\":",
+    "show_results": "Show results"
+}

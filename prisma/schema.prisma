@@ -1,0 +1,223 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  email         String          @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  // Application specifics
+  resultSets    ResultSet[]    @relation("userToResultSets")
+  teams         UsersOnTeams[]
+  roles         Role[]
+  // Optional for WebAuthn support
+  Authenticator Authenticator[]
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+}
+
+model Role {
+  id    String  @id @unique @default(uuid()) @db.Uuid
+  users User[]
+  name  String
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@id([provider, providerAccountId])
+}
+ 
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+ 
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+ 
+  @@id([identifier, token])
+}
+ 
+// Optional for WebAuthn support
+model Authenticator {
+  id                   String  @id @default(cuid())
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ResultSet {
+  id           String        @id @unique @db.Uuid
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  name         String?
+  answers      Answer[]      @relation("resultSetToAnswers")
+  teams        Team[]        @relation("resultSetToTeams")
+  sumItems     SumItem[]     @relation("resultSetToSumItem")
+  percentItems PercentItem[] @relation("resultSetToPercentItem")
+  categories   Category[]
+  user         User?         @relation("userToResultSets", fields: [userId], references: [id])
+  userId       String?        
+}
+
+model Team {
+  id         String         @id @unique @db.Uuid
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  name       String?
+  users      UsersOnTeams[]
+  resultSets ResultSet[]    @relation("resultSetToTeams")
+}
+
+model UsersOnTeams {
+  user               User    @relation(fields: [userId], references: id)
+  userId             String
+  team               Team    @relation(fields: [teamId], references: id)
+  teamId             String  @db.Uuid
+  sendMail           Boolean
+  invitationAccepted Boolean @default(false)
+  isOwner            Boolean @default(false)
+
+  @@id(name: "usersOnTeamsId", [userId, teamId])
+}
+
+model Answer {
+  id          String    @id @unique @db.Uuid
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  resultSet   ResultSet @relation("resultSetToAnswers", fields: [resultSetId], references: [id], onDelete: Cascade)
+  resultSetId String    @db.Uuid
+  question    Question  @relation("answersToQuestion", fields: [questionId], references: [id])
+  questionId  String    @db.Uuid
+  scaleItem   ScaleItem @relation("answerToScaleItem", fields: [scaleItemId], references: [id])
+  scaleItemId String    @db.Uuid
+
+  @@unique([resultSetId, questionId])
+}
+
+model SumItem {
+  id            String       @id @unique @db.Uuid
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  value         Int
+  resultSet     ResultSet    @relation("resultSetToSumItem", fields: [resultSetId], references: [id], onDelete: Cascade)
+  resultSetId   String       @db.Uuid
+  category      Category     @relation("categoryToSumItem", fields: [categoryId], references: [id])
+  categoryId    String       @db.Uuid
+  subCategory   SubCategory? @relation("subCategoryToSumItem", fields: [subCategoryId], references: [id])
+  subCategoryId String?      @db.Uuid
+
+  @@unique([resultSetId, categoryId, subCategoryId])
+}
+
+model PercentItem {
+  id            String       @id @unique @db.Uuid
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  value         Float
+  resultSet     ResultSet    @relation("resultSetToPercentItem", fields: [resultSetId], references: [id], onDelete: Cascade)
+  resultSetId   String       @db.Uuid
+  category      Category     @relation("categoryToPercentItem", fields: [categoryId], references: [id])
+  categoryId    String       @db.Uuid
+  subCategory   SubCategory? @relation("subCategoryToPercentItem", fields: [subCategoryId], references: [id])
+  subCategoryId String?      @db.Uuid
+
+  @@unique([resultSetId, categoryId, subCategoryId])
+}
+
+model Question {
+  id                  String                        @id @unique @db.Uuid
+  label               String
+  answers             Answer[]                      @relation("answersToQuestion")
+  category            Category                      @relation("categoryToQuestions", fields: [categoryId], references: [id])
+  categoryId          String                        @db.Uuid
+  subCategory         SubCategory?                  @relation("subCategoryToQuestions", fields: [subCategoryId], references: [id])
+  subCategoryId       String?                       @db.Uuid
+  mappedByScaleItem   SubCategoryMappedByScaleItem? @relation("subCategoryMappedByScaleItemToQuestions", fields: [mappedByScaleItemId], references: [id])
+  mappedByScaleItemId String?                       @db.Uuid
+
+  @@unique([label, categoryId, subCategoryId])
+}
+
+model Category {
+  id            String        @id @unique @db.Uuid
+  label         String        @unique
+  questions     Question[]    @relation("categoryToQuestions")
+  subCategories SubCategory[] @relation("categoryToSubCategories")
+  scaleItems    ScaleItem[]   @relation("scaleItemToCategory")
+  sumItems      SumItem[]     @relation("categoryToSumItem")
+  percentItems  PercentItem[] @relation("categoryToPercentItem")
+  resultSets    ResultSet[]
+}
+
+model SubCategory {
+  id                String                         @id @unique @db.Uuid
+  label             String
+  category          Category                       @relation("categoryToSubCategories", fields: [categoryId], references: [id])
+  categoryId        String                         @db.Uuid
+  questions         Question[]                     @relation("subCategoryToQuestions")
+  sumItems          SumItem[]                      @relation("subCategoryToSumItem")
+  percentItems      PercentItem[]                  @relation("subCategoryToPercentItem")
+  mappedByScaleItem SubCategoryMappedByScaleItem[] @relation("subCategoryMappedByScaleItemToSubCategory")
+
+  @@unique([label, categoryId])
+}
+
+model SubCategoryMappedByScaleItem {
+  id            String       @id @unique @db.Uuid
+  scaleItem     ScaleItem    @relation("subCategoryMappedByScaleItemToScaleItem", fields: [scaleItemId], references: [id])
+  scaleItemId   String       @db.Uuid
+  subCategory   SubCategory? @relation("subCategoryMappedByScaleItemToSubCategory", fields: [subCategoryId], references: [id])
+  subCategoryId String       @db.Uuid
+  questions     Question[]   @relation("subCategoryMappedByScaleItemToQuestions")
+}
+
+model ScaleItem {
+  id                           String                         @id @unique @db.Uuid
+  label                        String
+  value                        Int
+  category                     Category                       @relation("scaleItemToCategory", fields: [categoryId], references: [id])
+  categoryId                   String                         @db.Uuid
+  answers                      Answer[]                       @relation("answerToScaleItem")
+  subCategoryMappedByScaleItem SubCategoryMappedByScaleItem[] @relation("subCategoryMappedByScaleItemToScaleItem")
+}

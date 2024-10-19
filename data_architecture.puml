@@ -1,0 +1,102 @@
+@startuml data_architecture
+
+rectangle "User related aspects" {
+    class User {
+        - id: uuid
+        - name: string
+        - email: string
+        - createdAt: date-time
+        - updatedAt: date-time
+    }
+
+    class Team {
+        - id: uuid
+        - name: string
+        - createdAt: date-time
+        - updatedAt: date-time
+    }
+
+    User -> Team : m:n
+}
+
+rectangle "Results" {
+    class ResultSet {
+        - id: uuid
+        - name: string
+        - createdAt: date-time
+        - updatedAt: date-time
+    }
+
+    class Answer {
+        - id: uuid
+        - createdAt: date-time
+        - updatedAt: date-time
+    }
+
+    class SumItem {
+        - id: uuid
+        - value: number
+        - createdAt: date-time
+        - updatedAt: date-time
+    }
+
+    class PercentItem {
+        - id: uuid
+        - value: number
+        - createdAt: date-time
+        - updatedAt: date-time
+    }
+
+    ResultSet --> SumItem : 1:n
+    ResultSet --> PercentItem : 1:n
+    ResultSet --> Answer : 1:n
+}
+
+rectangle "Question catalog" {
+    class Question {
+        A question only 
+        - id: uuid
+        - label: string
+    }
+
+    class Category {
+        - id: uuid
+        - label: string
+    }
+
+    class SubCategory {
+        - id: uuid
+    }
+
+    class SubCategoryMapped {
+        - id: uuid
+    }
+
+    class ScaleItem {
+        - id: uuid
+        - label: string
+        - value: number
+    }
+
+    Question --> Category : m:1
+    Question --> SubCategory : m:1
+    Question --> SubCategoryMapped : m:1
+    Category -> SubCategory : 1:n
+    Category --> "mandatory" ScaleItem : 1:n
+    SubCategory --> "optional" ScaleItem : 1:n
+    SubCategoryMapped <-- "optional" ScaleItem : 1:n
+    SubCategory <- SubCategoryMapped : 1:n
+
+}
+
+User --> ResultSet : 1:n
+Team --> ResultSet : m:n
+SumItem --> Category : 1:n
+SumItem --> SubCategory : 1:n
+PercentItem --> Category : 1:n
+PercentItem --> SubCategory : 1:n
+ResultSet --> Category : m:n
+Answer --> Question : m:1
+Answer --> ScaleItem : m:1
+
+@enduml

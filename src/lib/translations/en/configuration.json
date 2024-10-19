@@ -1,0 +1,12 @@
+{
+    "accept_group_join_request": "Accept invitation(s) to group(s)",
+    "create_team": "Create team",
+    "team_name": "Name of the team",
+    "no_user_found_with_email_address": "No user found for this email address.",
+    "invite_user_to_team": "Invite user to team",
+    "email": "Email",
+    "delete_team": "Delete team \"{{name}}\"",
+    "delete": "Delete team",
+    "update_users_in_team": "Update user(s) in team",
+    "remove_users_from_team": "Remove user(s) from team"
+}

@@ -1,0 +1,9 @@
+{
+    "next": "next",
+    "previous": "previous",
+    "question_x_of_y": "Question {{xval}} of {{yval}}.",
+    "show_all": "Show all questions",
+    "show_unanswered_only": "Show only unanswered questions",
+    "all_questions_answered": "You have answered all questions."
+
+}
